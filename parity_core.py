@@ -15,6 +15,7 @@ from rdkit.Chem import MACCSkeys
 from rdkit.Chem.AtomPairs import Pairs
 from rdkit.Chem.AtomPairs import Torsions
 from rdkit.Chem import rdFMCS as MCS
+from rdkit.Chem.rdFMCS import BondCompare, AtomCompare
 
 
 def generate_parity(sm_1,sm_2):
@@ -31,19 +32,20 @@ def generate_parity(sm_1,sm_2):
         sim_score_best=None
         markush_best=None
 
-        mcs_graph_bondtypes_elements=MCS.FindMCS(ms,bondCompare='bondtypes',atomCompare='elements',timeout=10.0,completeRingsOnly=True)
-        matches_best,sim_score_best,markush_best=generate_sim_score(mol_1,mol_2,mcs_graph_bondtypes_elements.smarts)
+        mcs_graph_bondtypes_elements=MCS.FindMCS(ms,bondCompare=BondCompare.CompareOrder,atomCompare=AtomCompare.CompareElements,timeout=10,completeRingsOnly=True)
+        matches_best,sim_score_best,markush_best=generate_sim_score(mol_1,mol_2,mcs_graph_bondtypes_elements.smartsString)
 
-        mcs_graph_any_elements=MCS.FindMCS(ms,bondCompare='any',atomCompare='elements',timeout=10.0,completeRingsOnly=True)
-        matches,sim_score,markush=generate_sim_score(mol_1,mol_2,mcs_graph_any_elements.smarts)
+
+        mcs_graph_any_elements=MCS.FindMCS(ms,bondCompare=BondCompare.CompareAny,atomCompare=AtomCompare.CompareElements,timeout=10,completeRingsOnly=True)
+        matches,sim_score,markush=generate_sim_score(mol_1,mol_2,mcs_graph_any_elements.smartsString)
 
         if sim_score>sim_score_best:
                 matches_best=matches
                 sim_score_best=sim_score
                 markush_best=markush
 
-        mcs_graph_any_any=MCS.FindMCS(ms,bondCompare='any',atomCompare='any',timeout=30.0,completeRingsOnly=True)
-        matches,sim_score,markush=generate_sim_score(mol_1,mol_2,mcs_graph_any_any.smarts)
+        mcs_graph_any_any=MCS.FindMCS(ms,bondCompare=BondCompare.CompareAny,atomCompare=AtomCompare.CompareAny,timeout=30,completeRingsOnly=True)
+        matches,sim_score,markush=generate_sim_score(mol_1,mol_2,mcs_graph_any_any.smartsString)
         if sim_score>sim_score_best:
                 matches_best=matches
                 sim_score_best=sim_score
