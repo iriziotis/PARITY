@@ -14,7 +14,7 @@ from rdkit.Chem.Fingerprints import FingerprintMols
 from rdkit.Chem import MACCSkeys
 from rdkit.Chem.AtomPairs import Pairs
 from rdkit.Chem.AtomPairs import Torsions
-from rdkit.Chem import MCS
+from rdkit.Chem import rdFMCS as MCS
 
 
 def generate_parity(sm_1,sm_2):
