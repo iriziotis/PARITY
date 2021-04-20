@@ -19,7 +19,8 @@ from rdkit.Chem import rdFMCS as MCS
 from rdkit.Chem.rdFMCS import BondCompare, AtomCompare
 
 
-def generate_parity(sm_1,sm_2):
+def generate_parity(sm_1,sm_2,reduce_timeout=1):
+    faster = reduce_timeout
     # Check if input is a Marvin file or SMILES string
     try:
         mol_1 = MolFromMolFile(sm_1)
@@ -43,11 +44,11 @@ def generate_parity(sm_1,sm_2):
     sim_score_best=None
     markush_best=None
 
-    mcs_graph_bondtypes_elements=MCS.FindMCS(ms,bondCompare=BondCompare.CompareOrder,atomCompare=AtomCompare.CompareElements,timeout=10,completeRingsOnly=True)
+    mcs_graph_bondtypes_elements=MCS.FindMCS(ms,bondCompare=BondCompare.CompareOrder,atomCompare=AtomCompare.CompareElements,timeout=10/faster, ,completeRingsOnly=True)
     matches_best,sim_score_best,markush_best=generate_sim_score(mol_1,mol_2,mcs_graph_bondtypes_elements.smartsString)
 
 
-    mcs_graph_any_elements=MCS.FindMCS(ms,bondCompare=BondCompare.CompareAny,atomCompare=AtomCompare.CompareElements,timeout=10,completeRingsOnly=True)
+    mcs_graph_any_elements=MCS.FindMCS(ms,bondCompare=BondCompare.CompareAny,atomCompare=AtomCompare.CompareElements,timeout=10/faster,completeRingsOnly=True)
     matches,sim_score,markush=generate_sim_score(mol_1,mol_2,mcs_graph_any_elements.smartsString)
 
     if sim_score>sim_score_best:
@@ -55,7 +56,7 @@ def generate_parity(sm_1,sm_2):
             sim_score_best=sim_score
             markush_best=markush
 
-    mcs_graph_any_any=MCS.FindMCS(ms,bondCompare=BondCompare.CompareAny,atomCompare=AtomCompare.CompareAny,timeout=30,completeRingsOnly=True)
+    mcs_graph_any_any=MCS.FindMCS(ms,bondCompare=BondCompare.CompareAny,atomCompare=AtomCompare.CompareAny,timeout=30/faster,completeRingsOnly=True)
     matches,sim_score,markush=generate_sim_score(mol_1,mol_2,mcs_graph_any_any.smartsString)
     if sim_score>sim_score_best:
             matches_best=matches
