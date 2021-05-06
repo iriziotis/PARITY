@@ -3,7 +3,7 @@ import sys
 from subprocess import call
 import os
 import signal
-from rdkit import Chem
+from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem
 from rdkit.Chem import Descriptors
 from rdkit.Chem.rdchem import EditableMol
@@ -17,10 +17,14 @@ from rdkit.Chem import rdFMCS as MCS
 from rdkit.Chem.rdFMCS import BondCompare, AtomCompare
 
 
-def generate_parity(invariable, variable, faster=1):
+def generate_parity(invariable, variable, faster=1, quiet=False):
     """ Calculates PARITY score between two molecules (SMILES or .mol).
     If one of the molecules has an R group, it has to be put in the 
     second argument (sm_2)."""
+
+    if quiet:
+        lg = RDLogger.logger()
+        lg.setLevel(RDLogger.ERROR)
 
     # Check if input is a mol file or SMILES string
     try:
@@ -63,21 +67,14 @@ def generate_parity(invariable, variable, faster=1):
 def generate_sim_score(mol_1,mol_2,smarts):
     smiles_1=Chem.MolToSmiles(mol_1)
     smiles_2=Chem.MolToSmiles(mol_2)
-    #print smiles_1,smiles_2
     best_markush=0
     if smiles_1==smiles_2:
         best_matches=mol_1.GetNumAtoms()
         best_sim_score=1.0
-    elif mol_1.GetNumAtoms()==1 and smiles_1=="[H+]":
+    elif (mol_1.GetNumAtoms()==1 and smiles_1=="[H+]") or (mol_2.GetNumAtoms()==1 and smiles_2=="[H+]"):
         best_matches=0
         best_sim_score=0.0
-    elif mol_2.GetNumAtoms()==1 and smiles_2=="[H+]":
-        best_matches=0
-        best_sim_score=0.0
-    elif mol_1.GetNumAtoms()==2 and smiles_1=="[HH]":
-        best_matches=0
-        best_sim_score=0.0
-    elif mol_2.GetNumAtoms()==2 and smiles_2=="[HH]":
+    elif (mol_1.GetNumAtoms()==2 and smiles_1=="[HH]") or (mol_2.GetNumAtoms()==2 and smiles_2=="[HH]"):
         best_matches=0
         best_sim_score=0.0
     else:
@@ -178,4 +175,6 @@ if __name__ == "__main__":
     sm_1 = "Cc1cc2c(cc1C)N(C3=NC(=O)NC(=O)C3=N2)C[C@@H]([C@@H]([C@@H](CO[P@@](=O)(O)O[P@](=O)(O)OC[C@@H]4[C@H]([C@H]([C@@H](O4)n5cnc6c5ncnc6N)O)O)O)O)O"
     # NAD
     sm_2 = "c1cc(c[n+](c1)[C@H]2[C@@H]([C@@H]([C@H](O2)CO[P@@](=O)([O-])O[P@@](=O)(O)OC[C@@H]3[C@H]([C@H]([C@@H](O3)n4cnc5c4ncnc5N)O)O)O)O)C(=O)N"
+
+    sm_1, sm_2 = '[Na+]', '[Na+]'
     print(generate_parity(sm_1, sm_2))
